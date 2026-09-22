@@ -62,6 +62,7 @@ try {
   assert.match(await page.locator('#schedule-preview').textContent(), /6 rondes · 1 → 3 → 3 → 1/);
   await page.getByRole('button', { name: 'Aan tafel' }).click();
   assert.equal(await page.locator('#scoreboard tbody tr').count(), 6);
+  assert.deepEqual(await page.locator('#scoreboard tbody th button').evaluateAll(buttons => buttons.map(button => Number(button.firstChild.textContent))), [1, 2, 3, 3, 2, 1]);
   assert.deepEqual(await page.locator('.player-control').evaluateAll(rows => rows.map(row => row.id)), ['player-1', 'player-2', 'player-3', 'player-0']);
   assert.equal(await page.locator('#dealer-summary').textContent(), 'Sam schudt · Noor begint');
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
@@ -81,12 +82,15 @@ try {
   assert.match(await page.locator('#bid-summary').textContent(), /Voorspellingen compleet/);
   for (let i = 0; i < 4; i++) await page.locator(`#player-${i} [data-value="correct"]`).click();
   await page.locator('#player-0 [data-value="wrong"]').click();
+  assert.equal(await page.locator('#player-0 input[data-field="manual"]').getAttribute('max'), '-1');
+  assert.equal(await page.locator('#player-0 input[data-field="manual"]').isEditable(), false);
   await page.locator('#player-0 [data-field="manual"][data-action="decrement"]').click();
   assert.equal(await page.locator('#player-0 .score-delta').textContent(), '−5');
   assert.ok(await page.locator('#player-0 input[data-field="manual"]').evaluate(input => input.getAnimations().length > 0));
   // Rapid operations must apply immediately, regardless of an unfinished animation.
   await page.locator('#player-0 [data-field="manual"][data-action="increment"]').evaluate(button => { button.click(); document.querySelector('#player-0 [data-field="manual"][data-action="increment"]').click(); });
-  assert.equal(await page.locator('#player-0 input[data-field="manual"]').inputValue(), '5');
+  assert.equal(await page.locator('#player-0 input[data-field="manual"]').inputValue(), '');
+  assert.equal(await page.locator('#player-0 [data-field="manual"][data-action="increment"]').isDisabled(), true);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.locator('#player-0 [data-field="manual"][data-action="decrement"]').click();
   assert.equal(await page.locator('#player-0 .score-delta').count(), 0);
@@ -94,7 +98,7 @@ try {
   await page.locator('#player-0 [data-field="manual"][data-action="decrement"]').click();
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.reload();
-  assert.equal(await page.locator('#player-0 input[data-field="manual"]').inputValue(), '-5');
+  assert.equal(await page.locator('#player-0 input[data-field="manual"]').inputValue(), '-10');
   assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark');
   await page.locator('#finish-round').click();
   for (let round = 2; round < 6; round++) {

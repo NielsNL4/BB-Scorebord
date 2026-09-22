@@ -8,7 +8,7 @@ Een Nederlandstalig scorebord, ontworpen voor telefoon en tablet. Statische HTML
 2. Kies **wie als eerste schudt** en het **maximum aantal kaarten** (1–50). Maximum 10 betekent **20 rondes: 1 → 10 → 10 → 1**. De schudbeurt schuift iedere ronde één plaats op. De speler na de schudder staat bovenaan de invoerlijst; de schudder staat als laatste.
 3. Vul voorspelde slagen in met de knoppen of het toetsenbord. Ook **0** is een voorspelling; **—** betekent nog niet ingevuld. Elke speler mag maximaal het aantal beschikbare slagen voorspellen. Het gezamenlijke totaal mag **hoger of lager**, maar **niet gelijk** aan het aantal beschikbare slagen zijn. Dat is op de terugweg dus niet het rondenummer.
 4. Boven de ronde zie je **beschikbare slagen, totaal voorspeld en het aantal ingevulde spelers**. Zodra de andere biedingen bekend zijn, verschijnt het verboden bod bij de laatste speler. De +/− knoppen slaan dat getal over; ongeldige toetsenbordinvoer geeft een melding en wordt als openstaand bewaard. Een tussentijds gelijk totaal is wel toegestaan.
-5. Tik na de ronde op **Goed** voor **10 + 5 × voorspelde slagen**. Bij **Fout** vul je de volledige rondescore zelf in. Negatieve punten en nul zijn toegestaan; een lege score is nog open.
+5. Tik na de ronde op **Goed** voor **10 + 5 × voorspelde slagen**. Bij **Fout** gebruik je **+** en **−** voor de negatieve rondescore; via **+** kun je terug naar neutraal. Nul en positieve punten zijn niet toegestaan; een lege score is nog open.
 6. Rond de ronde af zodra alle voorspellingen geldig zijn en alle scores zijn ingevuld. Via de pijlen of rondenummers kun je eerdere rondes corrigeren. Totalen worden direct herberekend.
 7. De puntenstap is standaard 5 en via het tandwiel instelbaar op elk geheel getal van 1–100. Voorspellingen veranderen per 1, met overslaan van een verboden bod.
 8. Gebruik de **zon/maan-knop** bovenaan voor lichte of donkere modus. Bij het eerste bezoek volgt de pagina je apparaatinstelling; een eigen keuze wordt bewaard.
@@ -67,7 +67,7 @@ Alle assetpaden zijn relatief, dus de pagina werkt ook onder een repository-subp
 
 - Controleer op telefoon (375 px) en tablet (768 px) de horizontale tabelscroll, vaste namen/rondekolom en aanraakknoppen.
 - Voorspel in een ronde met minimaal 3 slagen 0 en 3 slagen en vink Goed aan: respectievelijk 10 en 25 punten.
-- Kies Fout, voer 0 en een negatieve score in, en controleer de totalen.
+- Kies Fout, voer een negatieve score in, en controleer de totalen.
 - Pas de puntenstap aan en wijzig een eerdere ronde.
 - Herlaad: alle invoer en de geselecteerde ronde moeten terugkomen.
 - Start een nieuw spel: annuleren behoudt het spel, bevestigen wist de scores.

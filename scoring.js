@@ -69,9 +69,23 @@ export function roundReady(game, index = game.active) {
 export function migrateGame(saved) {
   if (saved?.version === 1) {
     const migrated = { ...saved, version: 2, firstDealer: null, tricks: saved.rounds?.map((_, i) => i + 1) };
-    return validGame(migrated) ? migrated : null;
+    const normalized = normalizeManualScores(migrated);
+    return validGame(normalized) ? normalized : null;
   }
-  return validGame(saved) ? saved : null;
+  const normalized = normalizeManualScores(saved);
+  return validGame(normalized) ? normalized : null;
+}
+
+function normalizeManualScores(game) {
+  if (!game?.rounds || !Number.isInteger(game.step)) return game;
+  return {
+    ...game,
+    rounds: game.rounds.map(round => round.map(cell => (
+      cell.outcome === 'wrong' && cell.manual !== null && cell.manual >= 0
+        ? { ...cell, manual: -game.step }
+        : cell
+    )))
+  };
 }
 
 export function validGame(game) {
@@ -86,6 +100,6 @@ export function validGame(game) {
       && (cell.bid === null || (Number.isInteger(cell.bid) && cell.bid >= 0 && cell.bid <= MAX_BID))
       && [null, 'correct', 'wrong'].includes(cell.outcome)
       && (cell.outcome !== 'correct' || cell.bid !== null)
-      && (cell.manual === null || (Number.isInteger(cell.manual) && Math.abs(cell.manual) <= MAX_SCORE))))
+      && (cell.manual === null || (Number.isInteger(cell.manual) && cell.manual < 0 && Math.abs(cell.manual) <= MAX_SCORE))))
     && (!game.finished || game.rounds.every(roundComplete)));
 }

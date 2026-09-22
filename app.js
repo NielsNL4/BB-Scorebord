@@ -35,7 +35,7 @@ function save() {
 function renderBoard() {
   const scores = totals(game);
   const highest = Math.max(...scores);
-  $('#scoreboard').innerHTML = `<thead><tr><th scope="col">RONDE</th>${game.players.map(name => `<th scope="col">${escape(name)}</th>`).join('')}</tr></thead><tbody>${game.rounds.map((round, index) => `<tr class="${index === game.active ? 'active' : ''}"><th scope="row"><button data-round="${index}" aria-label="Ronde ${index + 1}, ${game.tricks[index]} slagen, bewerken" ${index === game.active ? 'aria-current="step"' : ''}>${index + 1}<small>${game.tricks[index]} ${game.tricks[index] === 1 ? 'slag' : 'slagen'}</small></button></th>${round.map(cell => {
+  $('#scoreboard').innerHTML = `<thead><tr><th scope="col">RONDE</th>${game.players.map(name => `<th scope="col">${escape(name)}</th>`).join('')}</tr></thead><tbody>${game.rounds.map((round, index) => `<tr class="${index === game.active ? 'active' : ''}"><th scope="row"><button data-round="${index}" aria-label="Speelronde ${index + 1}, ${game.tricks[index]} ${game.tricks[index] === 1 ? 'slag' : 'slagen'}, bewerken" ${index === game.active ? 'aria-current="step"' : ''}>${game.tricks[index]}<small>${game.tricks[index]} ${game.tricks[index] === 1 ? 'slag' : 'slagen'}</small></button></th>${round.map(cell => {
     const score = scoreFor(cell);
     return `<td class="${score === null ? 'pending' : ''}"><span class="score ${cell.outcome === 'correct' ? 'correct' : ''}">${score === null ? '—' : format(score)}</span><span class="prediction">${cell.bid === null ? 'nog geen bod' : `${cell.bid} ${cell.bid === 1 ? 'slag' : 'slagen'}`}</span></td>`;
    }).join('')}</tr>`).join('')}</tbody><tfoot><tr><th scope="row">Totaal</th>${scores.map(score => `<td class="${score === highest ? 'leading' : ''}"><span class="total-number">${format(score)}</span></td>`).join('')}</tr></tfoot>`;
@@ -78,7 +78,8 @@ function renderBidSummary() {
 
 function stepper(index, field, value, name) {
   const bid = field === 'bid';
-  return `<div class="stepper"><button type="button" data-action="decrement" data-field="${field}" data-player="${index}" aria-label="${bid ? 'Minder slagen' : 'Minder punten'} voor ${escape(name)}">−</button><input type="number" inputmode="${bid ? 'numeric' : 'decimal'}" min="${bid ? 0 : -MAX_SCORE}" max="${bid ? game.tricks[game.active] : MAX_SCORE}" step="1" value="${value ?? ''}" placeholder="—" data-field="${field}" data-player="${index}" ${bid ? `aria-describedby="bid-hint-${index}"` : ''} aria-label="${bid ? 'Voorspelde slagen' : 'Rondescore'} voor ${escape(name)}"><button type="button" data-action="increment" data-field="${field}" data-player="${index}" aria-label="${bid ? 'Meer slagen' : 'Meer punten'} voor ${escape(name)}">+</button></div>`;
+  const manualAtLimit = !bid && value === null;
+  return `<div class="stepper"><button type="button" data-action="decrement" data-field="${field}" data-player="${index}" aria-label="${bid ? 'Minder slagen' : 'Minder punten'} voor ${escape(name)}">−</button><input type="number" inputmode="${bid ? 'numeric' : 'decimal'}" min="${bid ? 0 : -MAX_SCORE}" max="${bid ? game.tricks[game.active] : -1}" step="1" value="${value ?? ''}" placeholder="—" data-field="${field}" data-player="${index}" ${bid ? `aria-describedby="bid-hint-${index}"` : ''} ${bid ? '' : 'readonly'} aria-label="${bid ? 'Voorspelde slagen' : 'Rondescore'} voor ${escape(name)}"><button type="button" data-action="increment" data-field="${field}" data-player="${index}" ${manualAtLimit ? 'disabled' : ''} aria-label="${bid ? 'Meer slagen' : 'Meer punten'} voor ${escape(name)}">+</button></div>`;
 }
 
 function playerMarkup(index) {
@@ -147,8 +148,14 @@ $('#player-controls').addEventListener('click', event => {
   if (action === 'outcome') {
     cell.outcome = cell.outcome === value ? null : value;
   } else {
-    const delta = (action === 'increment' ? 1 : -1) * (field === 'bid' ? 1 : game.step);
-    cell[field] = field === 'bid' ? nextBid(game, index, action === 'increment' ? 1 : -1) : Math.max(-MAX_SCORE, Math.min(MAX_SCORE, (cell[field] ?? 0) + delta));
+    if (field === 'manual' && action === 'increment') {
+      if (cell[field] === null) return;
+      cell[field] += game.step;
+      if (cell[field] >= 0) cell[field] = null;
+    } else {
+      const delta = (action === 'increment' ? 1 : -1) * (field === 'bid' ? 1 : game.step);
+      cell[field] = field === 'bid' ? nextBid(game, index, action === 'increment' ? 1 : -1) : Math.max(-MAX_SCORE, Math.min(-1, (cell[field] ?? 0) + delta));
+    }
   }
   updatePlayer(index, `button[data-action="${action}"]${field ? `[data-field="${field}"]` : `[data-value="${value}"]`}`);
 });

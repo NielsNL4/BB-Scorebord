@@ -7,17 +7,17 @@ test('exacte voorspelling geeft 10 bonus en 5 per slag, ook bij nul', () => {
   assert.equal(scoreFor({ bid: 3, outcome: 'correct', manual: null }), 25);
 });
 
-test('handmatige nul en negatieve scores verschillen van openstaande scores', () => {
+test('handmatige negatieve scores verschillen van openstaande scores', () => {
   const game = createGame(['Sam', 'Noor'], 2, 5);
   assert.equal(roundComplete(game.rounds[0]), false);
-  game.rounds[0][0] = { bid: 2, outcome: 'wrong', manual: 0 };
+  game.rounds[0][0] = { bid: 2, outcome: 'wrong', manual: -5 };
   game.rounds[0][1] = { bid: 1, outcome: 'wrong', manual: -15 };
   assert.equal(roundComplete(game.rounds[0]), true);
-  assert.deepEqual(totals(game), [0, -15]);
+  assert.deepEqual(totals(game), [-5, -15]);
   game.rounds[1][0] = { bid: 3, outcome: 'correct', manual: -5 };
-  assert.deepEqual(totals(game), [25, -15]);
-  game.rounds[0][1].manual = 10;
-  assert.deepEqual(totals(game), [25, 10]);
+  assert.deepEqual(totals(game), [20, -15]);
+  game.rounds[0][1].manual = -10;
+  assert.deepEqual(totals(game), [20, -10]);
 });
 
 test('opslagvalidatie beschermt tegen onvolledige en ongeldige speldata', () => {
@@ -33,6 +33,17 @@ test('opslagvalidatie beschermt tegen onvolledige en ongeldige speldata', () => 
   assert.ok(validGame(game));
   game.rounds[0][0].manual = '10';
   assert.equal(validGame(game), false);
+  game.rounds[0][0].manual = 0;
+  assert.equal(validGame(game), false);
+});
+
+test('opgeslagen niet-negatieve foute scores worden negatief gemigreerd', () => {
+  const game = createGame(['Sam', 'Noor'], 1, 5);
+  game.rounds[0][0] = { bid: 1, outcome: 'wrong', manual: 0 };
+  game.rounds[1][1] = { bid: 1, outcome: 'wrong', manual: 10 };
+  const migrated = migrateGame(game);
+  assert.equal(migrated.rounds[0][0].manual, -5);
+  assert.equal(migrated.rounds[1][1].manual, -5);
 });
 
 test('schema bevat beide hoogste rondes en loopt volledig terug', () => {
