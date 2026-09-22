@@ -25,7 +25,11 @@ export function schedule(maximum) {
 
 export function createGame(players, maximum, step, firstDealer = 0) {
   const tricks = schedule(Math.min(maximum, maxCardsForPlayers(players.length)));
-  return { version: 2, players, step, firstDealer, tricks, active: 0, finished: false, rounds: tricks.map(() => players.map(() => ({ bid: null, outcome: null, manual: null }))) };
+  return { version: 2, players, step, firstDealer, tricks, smokeBreakEnabled: smokeBreakDefault(players), smokeBreakShown: false, active: 0, finished: false, rounds: tricks.map(() => players.map(() => ({ bid: null, outcome: null, manual: null }))) };
+}
+
+export function smokeBreakDefault(players) {
+  return players.some(name => /^(luuk|niels)$/i.test(name.trim()));
 }
 
 export function dealerFor(game, round = game.active) {
@@ -80,6 +84,8 @@ function normalizeManualScores(game) {
   if (!game?.rounds || !Number.isInteger(game.step)) return game;
   return {
     ...game,
+    smokeBreakEnabled: typeof game.smokeBreakEnabled === 'boolean' ? game.smokeBreakEnabled : smokeBreakDefault(game.players),
+    smokeBreakShown: game.smokeBreakShown === true,
     rounds: game.rounds.map(round => round.map(cell => (
       cell.outcome === 'wrong' && cell.manual !== null && cell.manual >= 0
         ? { ...cell, manual: -game.step }
@@ -95,7 +101,8 @@ export function validGame(game) {
     && (game.firstDealer === null || (Number.isInteger(game.firstDealer) && game.firstDealer >= 0 && game.firstDealer < game.players.length))
     && Array.isArray(game.rounds) && game.rounds.length >= 1 && game.rounds.length <= 100
     && Array.isArray(game.tricks) && game.tricks.length === game.rounds.length && game.tricks.every(n => Number.isInteger(n) && n >= 1 && n <= MAX_BID)
-    && Number.isInteger(game.active) && game.active >= 0 && game.active < game.rounds.length && typeof game.finished === 'boolean'
+      && Number.isInteger(game.active) && game.active >= 0 && game.active < game.rounds.length && typeof game.finished === 'boolean'
+    && typeof game.smokeBreakEnabled === 'boolean' && typeof game.smokeBreakShown === 'boolean'
     && game.rounds.every(round => Array.isArray(round) && round.length === game.players.length && round.every(cell => cell
       && (cell.bid === null || (Number.isInteger(cell.bid) && cell.bid >= 0 && cell.bid <= MAX_BID))
       && [null, 'correct', 'wrong'].includes(cell.outcome)

@@ -1,4 +1,4 @@
-import { MAX_SCORE, scoreFor, totals, createGame, migrateGame, dealerFor, playerOrder, bidSummary, forbiddenBid, nextBid, roundReady, maxCardsForPlayers } from './scoring.js';
+import { MAX_SCORE, scoreFor, totals, createGame, migrateGame, dealerFor, playerOrder, bidSummary, forbiddenBid, nextBid, roundReady, maxCardsForPlayers, smokeBreakDefault } from './scoring.js';
 import { initSetup } from './setup.js';
 import { animate, animateScoreChanges } from './motion.js';
 
@@ -197,6 +197,12 @@ $('#player-controls').addEventListener('focusout', event => {
 });
 
 function goToRound(index) { game.active = index; save(); renderRound(); }
+function maybeShowSmokeBreak() {
+  if (!game.smokeBreakEnabled || game.smokeBreakShown) return;
+  game.smokeBreakShown = true;
+  save();
+  $('#smoke-break-dialog').showModal();
+}
 $('#previous-round').addEventListener('click', () => goToRound(game.active - 1));
 $('#next-round').addEventListener('click', () => goToRound(game.active + 1));
 $('#scoreboard').addEventListener('click', event => {
@@ -205,7 +211,11 @@ $('#scoreboard').addEventListener('click', event => {
 });
 $('#finish-round').addEventListener('click', () => {
   if (!roundReady(game)) return;
-  if (game.active < game.rounds.length - 1) goToRound(game.active + 1);
+  if (game.active < game.rounds.length - 1) {
+    const halfway = game.active + 1 === game.rounds.length / 2;
+    goToRound(game.active + 1);
+    if (halfway) maybeShowSmokeBreak();
+  }
   else {
     const incomplete = game.rounds.findIndex((_, i) => !roundReady(game, i));
     if (incomplete !== -1) { goToRound(incomplete); $('#round-progress').textContent = 'Vul eerst deze openstaande ronde in.'; }
@@ -215,6 +225,7 @@ $('#finish-round').addEventListener('click', () => {
 
 $('#settings-button').addEventListener('click', () => {
   $('#point-step').value = game?.step ?? $('#initial-step').value;
+  $('#smoke-break-enabled').checked = game?.smokeBreakEnabled ?? smokeBreakDefault(setup.getPlayers());
   $('#settings-dialog').showModal();
 });
 $('#close-settings').addEventListener('click', () => $('#settings-dialog').close());
@@ -222,7 +233,7 @@ $('#settings-form').addEventListener('submit', event => {
   event.preventDefault();
   const step = Number($('#point-step').value);
   if (!Number.isInteger(step) || step < 1 || step > 100) return;
-  if (game) { game.step = step; save(); renderRound(); }
+  if (game) { game.step = step; game.smokeBreakEnabled = $('#smoke-break-enabled').checked; save(); renderRound(); }
   else {
     const select = $('#initial-step');
     if (![...select.options].some(option => Number(option.value) === step)) select.add(new Option(`${step} punten`, String(step)));

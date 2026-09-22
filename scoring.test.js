@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { scoreFor, roundComplete, totals, createGame, validGame, schedule, dealerFor, playerOrder, bidSummary, forbiddenBid, nextBid, roundReady, migrateGame, maxCardsForPlayers } from './scoring.js';
+import { scoreFor, roundComplete, totals, createGame, validGame, schedule, dealerFor, playerOrder, bidSummary, forbiddenBid, nextBid, roundReady, migrateGame, maxCardsForPlayers, smokeBreakDefault } from './scoring.js';
 
 test('exacte voorspelling geeft 10 bonus en 5 per slag, ook bij nul', () => {
   assert.equal(scoreFor({ bid: 0, outcome: 'correct', manual: null }), 10);
@@ -44,6 +44,13 @@ test('opgeslagen niet-negatieve foute scores worden negatief gemigreerd', () => 
   const migrated = migrateGame(game);
   assert.equal(migrated.rounds[0][0].manual, -5);
   assert.equal(migrated.rounds[1][1].manual, -5);
+});
+
+test('rookpauze staat standaard aan voor Luuk of Niels', () => {
+  assert.equal(smokeBreakDefault(['Sam', 'Luuk']), true);
+  assert.equal(smokeBreakDefault(['NIELS', 'Sam']), true);
+  assert.equal(smokeBreakDefault(['Niels de Boer', 'Sam']), false);
+  assert.equal(createGame(['Sam', 'Luuk'], 8, 5).smokeBreakShown, false);
 });
 
 test('schema bevat beide hoogste rondes en loopt volledig terug', () => {

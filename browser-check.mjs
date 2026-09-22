@@ -22,10 +22,10 @@ try {
   await page.reload();
   assert.equal(await page.locator('html').getAttribute('data-theme'), 'light');
   await page.locator('#theme-button').click();
-  for (const [i, name] of ['Sam', 'Noor', 'Jesse', 'Alex'].entries()) await page.locator('#players input').nth(i).fill(name);
+  for (const [i, name] of ['Sam', 'Noor', 'Jesse', 'Luuk'].entries()) await page.locator('#players input').nth(i).fill(name);
   await page.locator('#first-dealer').selectOption({ label: 'Sam' });
   await page.locator('#players [data-action="down"]').first().click();
-  assert.deepEqual(await page.locator('#players input').evaluateAll(inputs => inputs.map(input => input.value)), ['Noor', 'Sam', 'Jesse', 'Alex']);
+  assert.deepEqual(await page.locator('#players input').evaluateAll(inputs => inputs.map(input => input.value)), ['Noor', 'Sam', 'Jesse', 'Luuk']);
   assert.equal(await page.locator('#first-dealer option:checked').textContent(), 'Sam');
 
   // Touch drag moves Sam from second to first while retaining the dealer identity.
@@ -108,6 +108,11 @@ try {
       await page.locator(`#player-${i} [data-value="correct"]`).click();
     }
     await page.locator('#finish-round').click();
+    if (round === 2) {
+      assert.equal(await page.locator('#smoke-break-dialog').isVisible(), true);
+      assert.equal(await page.locator('#smoke-break-dialog p').textContent(), 'Tijd voor een rookpauze. 🚬');
+      await page.locator('#smoke-break-dialog button').click();
+    }
   }
   assert.equal(await page.locator('#game-result').isVisible(), true);
   await page.locator('#previous-round').click();

@@ -12,6 +12,7 @@ Een Nederlandstalig scorebord, ontworpen voor telefoon en tablet. Statische HTML
 6. Rond de ronde af zodra alle voorspellingen geldig zijn en alle scores zijn ingevuld. Via de pijlen of rondenummers kun je eerdere rondes corrigeren. Totalen worden direct herberekend.
 7. De puntenstap is standaard 5 en via het tandwiel instelbaar op elk geheel getal van 1–100. Voorspellingen veranderen per 1, met overslaan van een verboden bod.
 8. Gebruik de **zon/maan-knop** bovenaan voor lichte of donkere modus. Bij het eerste bezoek volgt de pagina je apparaatinstelling; een eigen keuze wordt bewaard.
+9. De **rookpauze** staat automatisch aan bij een speler met de naam Luuk of Niels. Als de optie aanstaat, verschijnt halverwege het spel de melding **Tijd voor een rookpauze. 🚬**.
 
 ### Kaartenlimiet en animaties
 
